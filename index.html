@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilingual Color Match</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            transition: background-color 0.4s ease;
+        }
+
+        header {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .section-label {
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.5);
+            margin: 0;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 columns for desktop */
+            gap: 12px;
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .color-card {
+            aspect-ratio: 1 / 1;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: 5px solid white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+            user-select: none;
+            text-align: center;
+        }
+
+        .color-card:active {
+            transform: scale(0.9);
+        }
+
+        hr {
+            width: 100%;
+            border: 0;
+            height: 3px;
+            background: #ccc;
+            margin: 0;
+        }
+
+        /* Mobile View (2 columns to fit all 12 buttons per section) */
+        @media (max-width: 600px) {
+            .game-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                padding: 10px;
+            }
+            .color-card { font-size: 0.9rem; border-width: 3px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2 id="status">Tap any color / कुनै रङ्ग छान्नुहोस्</h2>
+    </header>
+
+    <p class="section-label">English Colors</p>
+    <div id="english-grid" class="game-grid"></div>
+
+    <hr>
+
+    <p class="section-label">नेपाली रङ्गहरू (Nepali Colors)</p>
+    <div id="nepali-grid" class="game-grid"></div>
+
+    <script>
+        const colorData = [
+            { en: 'Red', ne: 'रातो', hex: '#FF4757', dark: true },
+            { en: 'Blue', ne: 'निलो', hex: '#2E86DE', dark: true },
+            { en: 'Green', ne: 'हरियो', hex: '#2ED573', dark: true },
+            { en: 'Yellow', ne: 'पहेँलो', hex: '#ECCC68', dark: false },
+            { en: 'Orange', ne: 'सुन्तला', hex: '#FFA502', dark: false },
+            { en: 'Purple', ne: 'प्याजी', hex: '#8E44AD', dark: true },
+            { en: 'Pink', ne: 'गुलाबी', hex: '#FF80AB', dark: false },
+            { en: 'Brown', ne: 'खैरो', hex: '#8B4513', dark: true },
+            { en: 'Black', ne: 'कालो', hex: '#2F3542', dark: true },
+            { en: 'White', ne: 'सेतो', hex: '#FFFFFF', dark: false },
+            { en: 'Grey', ne: 'खरानी', hex: '#A4B0BE', dark: false },
+            { en: 'Sky Blue', ne: 'आकासे', hex: '#81ECEC', dark: false }
+        ];
+
+        const enGrid = document.getElementById('english-grid');
+        const neGrid = document.getElementById('nepali-grid');
+        const statusText = document.getElementById('status');
+
+        // Function to handle clicking and speaking
+        function handleAction(text, lang, hex, isDark) {
+            // Change Background
+            document.body.style.backgroundColor = hex;
+            statusText.innerText = text;
+            statusText.style.color = isDark && hex !== '#FFFFFF' ? 'white' : '#333';
+            statusText.parentElement.style.backgroundColor = hex;
+
+            // Speech
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = lang;
+            msg.rate = 0.9;
+            window.speechSynthesis.speak(msg);
+
+            // Reset background slightly after delay
+            setTimeout(() => {
+                document.body.style.backgroundColor = "#f0f2f5";
+                statusText.style.color = "#333";
+                statusText.parentElement.style.backgroundColor = "white";
+            }, 1200);
+        }
+
+        // Render English Grid
+        colorData.forEach(color => {
+            const btn = document.createElement('div');
+            btn.className = 'color-card';
+            btn.style.backgroundColor = color.hex;
+            btn.style.color = color.dark ? 'white' : '#333';
+            btn.innerText = color.en;
+            btn.onclick = () => handleAction(color.en, 'en-US', color.hex, color.dark);
+            enGrid.appendChild(btn);
+        });
+
+        // Render Nepali Grid
+        colorData.forEach(color => {
+            const btn = document.createElement('div');
+            btn.className = 'color-card';
+            btn.style.backgroundColor = color.hex;
+            btn.style.color = color.dark ? 'white' : '#333';
+            btn.innerText = color.ne;
+            btn.onclick = () => handleAction(color.ne, 'ne-NP', color.hex, color.dark);
+            neGrid.appendChild(btn);
+        });
+    </script>
+</body>
+</html>
